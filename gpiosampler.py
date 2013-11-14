@@ -1,24 +1,13 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
+import RPi.GPIO as GPIO
 import pygame
 import glob
 
-pygame.mixer.init()
-
-
-#simulate gpio on keyboard
-pygame.display.init()
-pygame.display.set_mode((100,100), pygame.RESIZABLE)
-def readGPIO(index):
-    keys = [pygame.K_a, pygame.K_s, pygame.K_d, pygame.K_f,
-            pygame.K_h, pygame.K_j, pygame.K_k, pygame.K_l, pygame.K_q]
-    return pygame.key.get_pressed()[keys[index]]
-
-
-#################################################
+###################################################
 
 class SoundTrigger:
-    buttons = [4,5,6,7]
+    buttons = [17,18,27,22]
 
 
     def __init__(self):
@@ -59,7 +48,7 @@ class SoundTrigger:
     #read gpio values and start/stop audio accordingly
     def process(self):
         for i in range(len(self.buttons)):
-            if self.buttonStates[i] != readGPIO(self.buttons[i]):
+            if self.buttonStates[i] != GPIO.input(self.buttons[i]):
                 self.buttonStates[i] = not self.buttonStates[i]
                 if self.buttonStates[i]:
                     print "play sound " + str(i)
@@ -81,9 +70,9 @@ class SoundTrigger:
 #########################################
 
 class BankSelector:
-    activate = [0,3]
-    prev = 1
-    next = 2
+    activate = [17,25]
+    prev = 18
+    next = 27
 
     def __init__(self):
         self.isActive = False
@@ -93,7 +82,7 @@ class BankSelector:
 
     def process(self):
         #update the isActive value
-        if self.activateIsPressed != ([readGPIO(b) for b in self.activate].count(False) == 0):
+        if self.activateIsPressed != ([GPIO.input(b) for b in self.activate].count(False) == 0):
             self.activateIsPressed = not self.activateIsPressed
             if self.activateIsPressed:
                 self.isActive = not self.isActive
@@ -101,12 +90,12 @@ class BankSelector:
 
         if self.isActive:
 
-            if self.prevIsPressed != readGPIO(self.prev):
+            if self.prevIsPressed != GPIO.input(self.prev):
                 self.prevIsPressed = not self.prevIsPressed
                 if self.prevIsPressed:
                     st.prevBank()
 
-            if self.nextIsPressed != readGPIO(self.next):
+            if self.nextIsPressed != GPIO.input(self.next):
                 self.nextIsPressed = not self.nextIsPressed
                 if self.nextIsPressed:
                     st.nextBank()
@@ -114,15 +103,25 @@ class BankSelector:
 
 #########################################
 
+#set up audio
+pygame.mixer.init()
+
+#set up pins
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(18, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(22, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(24, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(25, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+
 st = SoundTrigger()
 bs = BankSelector()
 
-while True:
-    pygame.event.pump()
 
+while True:
     bs.process()
     if not bs.isActive:
         st.process()
-
-    if readGPIO(8):
-        exit()
