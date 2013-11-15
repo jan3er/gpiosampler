@@ -75,9 +75,9 @@ class SoundTrigger:
 #########################################
 
 class BankSelector:
-    activate = [17,25]
-    prev = 18
-    next = 27
+    activate = [17,18]
+    prev = 17
+    next = 18
 
     def __init__(self):
         self.isActive = False
