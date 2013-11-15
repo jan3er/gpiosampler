@@ -6,9 +6,14 @@ import glob
 
 ###################################################
 
-class SoundTrigger:
-    buttons = [17,18,27,22]
+def buttonDown(i):
+    return not GPIO.input(i)
 
+
+###################################################
+
+class SoundTrigger:
+    buttons = [17,18,27,22,23,24,25]
 
     def __init__(self):
         soundbank = []
@@ -48,7 +53,7 @@ class SoundTrigger:
     #read gpio values and start/stop audio accordingly
     def process(self):
         for i in range(len(self.buttons)):
-            if self.buttonStates[i] != GPIO.input(self.buttons[i]):
+            if self.buttonStates[i] != buttonDown(self.buttons[i]):
                 self.buttonStates[i] = not self.buttonStates[i]
                 if self.buttonStates[i]:
                     print "play sound " + str(i)
@@ -82,7 +87,7 @@ class BankSelector:
 
     def process(self):
         #update the isActive value
-        if self.activateIsPressed != ([GPIO.input(b) for b in self.activate].count(False) == 0):
+        if self.activateIsPressed != ([buttonDown(b) for b in self.activate].count(False) == 0):
             self.activateIsPressed = not self.activateIsPressed
             if self.activateIsPressed:
                 self.isActive = not self.isActive
@@ -90,12 +95,12 @@ class BankSelector:
 
         if self.isActive:
 
-            if self.prevIsPressed != GPIO.input(self.prev):
+            if self.prevIsPressed != buttonDown(self.prev):
                 self.prevIsPressed = not self.prevIsPressed
                 if self.prevIsPressed:
                     st.prevBank()
 
-            if self.nextIsPressed != GPIO.input(self.next):
+            if self.nextIsPressed != buttonDown(self.next):
                 self.nextIsPressed = not self.nextIsPressed
                 if self.nextIsPressed:
                     st.nextBank()
@@ -108,13 +113,13 @@ pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=64)
 
 #set up pins
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(18, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(22, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(24, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(25, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(18, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(22, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(24, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(25, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 
 st = SoundTrigger()
