@@ -104,7 +104,7 @@ class BankSelector:
 #########################################
 
 #set up audio
-pygame.mixer.init()
+pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=64)
 
 #set up pins
 GPIO.setmode(GPIO.BCM)

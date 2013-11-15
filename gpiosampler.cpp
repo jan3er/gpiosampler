@@ -5,8 +5,12 @@
 #include "SDL/SDL.h"
 #include "SDL/SDL_mixer.h"
 
+//GPIO
+#include <wiringPi.h>
+
 //general stuf
 #include <iostream>
+#include <array>
 #include <vector>
 #include <map>
 #include <string>
@@ -55,67 +59,65 @@ void readSoundbank(map<string, array<Mix_Chunk*, N>> &soundbank)
     closedir (pdir);
 }
 
+void setupGPIO()
+{
+    wiringPiSetupGpio();
+    pinMode (17, INPUT); 
+    pullUpDnControl (17, PUD_DOWN);
+}
+
 ///////////////////////////////////
 
 #include "stdlib.h"
 
 int main(int argc, char *argv[])
 {
+    cout << "start" << endl;
 
-	SDL_Surface *screen;			//Pointer to the main screen surface
-	Mix_Chunk *sound = NULL;		//Pointer to our sound, in memory
-	int channel;				//Channel on which our sound is played
-	  
-	int audio_rate = 22050;			//Frequency of audio playback
-	Uint16 audio_format = AUDIO_S16SYS; 	//Format of the audio we're playing
-	int audio_channels = 2;			//2 channels = stereo
-	int audio_buffers = 4096;		//Size of the audio buffers in memory
-	
-	//Initialize BOTH SDL video and SDL audio
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
-		cout << "error" << endl;
-		return 1;
-	}
-	
-	//Initialize SDL_mixer with our chosen audio settings
-	if(Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers) != 0) {
-		cout << "error" << endl;
-		exit(1);
-	}
-	
-	//Load our WAV file from disk
-	sound = Mix_LoadWAV("soundbank/a.0.wav");
-	if(sound == NULL) {
-		cout << "error" << endl;
-	}
+    int audio_rate = 22050;			//Frequency of audio playback
+    Uint16 audio_format = AUDIO_S16SYS; 	//Format of the audio we're playing
+    int audio_channels = 2;			//2 channels = stereo
+    int audio_buffers = 64;	 		//Size of the audio buffers in memory
+    //int audio_buffers = 4096;	 		//Size of the audio buffers in memory
 
-	map<string, array<Mix_Chunk*, 4>> soundbank;
-	readSoundbank(soundbank);
-	
-	//Set the video mode to anything, just need a window
-	screen = SDL_SetVideoMode(320, 240, 0, SDL_ANYFORMAT);
-	if (screen == NULL) {
-		cout << "error" << endl;
-		return 1;
-	}
-	
+    //Initialize SDL audio
+    if (SDL_Init(SDL_INIT_AUDIO) != 0) {
+	cout << "error audio" << endl;
+	return 1;
+    }
+
+    //Initialize SDL_mixer with our chosen audio settings
+    if(Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers) != 0) {
+	cout << "error mixer open" << endl;
+	exit(1);
+    }
+
+    //load sounds from file
+    map<string, array<Mix_Chunk*, 4>> soundbank;
+    readSoundbank(soundbank);
+
+    //wait for some gpio input
+    setupGPIO();
+    while(1)
+    {
+	while(!digitalRead(17));
+
 	//Play our sound file, and capture the channel on which it is played
-	channel = Mix_PlayChannel(-1, soundbank["a"][3], 0);
+	int channel = Mix_PlayChannel(-1, soundbank["b"][0], 0);
 	if(channel == -1) {
-		cout << "error" << endl;
+	    cout << "error channel" << endl;
 	}
-
-	
 	//Wait until the sound has stopped playing
 	while(Mix_Playing(channel) != 0);
-	
-	//Release the memory allocated to our sound
-	Mix_FreeChunk(sound);
-	
-	//Need to make sure that SDL_mixer and SDL have a chance to clean up
-	Mix_CloseAudio();
-	SDL_Quit();	
-	
-	//Return success!
-	return 0;
+    }
+
+    //Release the memory allocated to our sound
+    //Mix_FreeChunk(sound);
+
+    //Need to make sure that SDL_mixer and SDL have a chance to clean up
+    Mix_CloseAudio();
+    SDL_Quit();	
+
+    //Return success!
+    return 0;
 }
