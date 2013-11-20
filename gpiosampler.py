@@ -6,6 +6,7 @@ import glob
 
 ###################################################
 
+#return if button is pressed
 def buttonDown(i):
     return not GPIO.input(i)
 
@@ -13,13 +14,14 @@ def buttonDown(i):
 ###################################################
 
 class SoundTrigger:
-    buttons = [17,18,27,22,23,24,25]
+    buttons = [18,17,27,22,23,24,25]
 
     def __init__(self):
         soundbank = []
         buttonStates = []
         self.fillSoundbank()
         self.buttonStates = [False] * len(self.buttons)
+        self.isPlaying    = [False] * len(self.buttons)
         self.currentSet = 0
 
 
@@ -56,10 +58,12 @@ class SoundTrigger:
             if self.buttonStates[i] != buttonDown(self.buttons[i]):
                 self.buttonStates[i] = not self.buttonStates[i]
                 if self.buttonStates[i]:
-                    print "play sound " + str(i)
+                    #button was pressed down
+                    #print "play sound " + str(i)
                     self.soundbank[self.currentSet][i].play()
                 else:
-                    print "stop sound " + str(i)
+                    #button was released
+                    #print "stop sound " + str(i)
                     self.soundbank[self.currentSet][i].stop()
 
 
@@ -75,9 +79,9 @@ class SoundTrigger:
 #########################################
 
 class BankSelector:
-    activate = [17,18]
+    activate = [18,22]
     prev = 17
-    next = 18
+    next = 27
 
     def __init__(self):
         self.isActive = False
@@ -124,7 +128,6 @@ GPIO.setup(25, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 st = SoundTrigger()
 bs = BankSelector()
-
 
 while True:
     bs.process()
