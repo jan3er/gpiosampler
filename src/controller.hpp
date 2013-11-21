@@ -1,9 +1,6 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-// traversing directories
-#include <dirent.h>
-
 // sound mixer
 #include "SDL/SDL.h"
 #include "SDL/SDL_mixer.h"
@@ -28,10 +25,11 @@ using namespace std;
 ///////////////////////////////////
 
 template <unsigned int N> class Controller {
-private:
+protected:
   shared_ptr<GPIO<N> > gpio;
   shared_ptr<Soundbank<N> > soundbank;
   shared_ptr<Trigger<N> > trigger;
+  bool isActive;
 
   /*
    * start SDL and SDL_mixser
@@ -61,13 +59,18 @@ private:
     SDL_Quit();
   }
 
+  /*
+   * to be called once each circle
+   */
+  virtual void step() = 0;
+
 public:
   Controller()
       : gpio{ new GPIO<N> }, soundbank{ new Soundbank<N> },
-        trigger{ new Trigger<N>(gpio, soundbank) } {
+        trigger{ new Trigger<N>(gpio, soundbank) }, isActive(false) {
     openAudio();
     soundbank->add("soundbank");
-    trigger->step();
+    trigger->setActive(true);
   }
 
   ~Controller() { closeAudio(); }
@@ -75,6 +78,7 @@ public:
   void run() {
     while (1) {
         gpio->step();
+        this->step();
         trigger->step();
     }
   }

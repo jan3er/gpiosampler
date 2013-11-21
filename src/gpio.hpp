@@ -19,7 +19,7 @@ public:
 private:
   array<State, N> buttonState;
   //mapping[i] corresponds to the pin number of button i
-  static array<unsigned int, N> mapping;
+  static const array<unsigned int, N> mapping;
 
 public:
 
@@ -46,26 +46,29 @@ public:
           break;
         case State::LOW_LEVEL:
           buttonState[i] = RISING_EDGE;
+          cout << "rise " << i << endl;
           break;
         case State::RISING_EDGE:
           buttonState[i] = HIGH_LEVEL;
           break;
         case State::FALLING_EDGE:
           buttonState[i] = RISING_EDGE;
+          cout << "rise " << i << endl;
           break;
         }
-
       } else {
         // low level
         switch (buttonState[i]) {
         case State::HIGH_LEVEL:
           buttonState[i] = FALLING_EDGE;
+          cout << "fall " << i << endl;
           break;
         case State::LOW_LEVEL:
           buttonState[i] = LOW_LEVEL;
           break;
         case State::RISING_EDGE:
           buttonState[i] = FALLING_EDGE;
+          cout << "fall " << i << endl;
           break;
         case State::FALLING_EDGE:
           buttonState[i] = LOW_LEVEL;
@@ -82,7 +85,4 @@ public:
     return buttonState[i];
   }
 };
-template <>
-array<unsigned int, 7> GPIO<7>::mapping{ { 18, 17, 22, 27, 23, 24, 25 } };
-
 #endif //GPIO_H

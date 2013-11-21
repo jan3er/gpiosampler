@@ -69,8 +69,8 @@ public:
     // assure that there are no nullptrs
     for (auto &i : soundbank) {
       for (auto &j : i.second) {
-	(void)j;
-	assert(j != nullptr);
+        (void)j;
+        assert(j != nullptr);
       }
     }
 
@@ -90,7 +90,7 @@ public:
    */
   Mix_Chunk *get(unsigned int i) {
     assert(i < N);
-    return soundbank["a"][i];
+    return soundbank[currentBank][i];
   }
 };
 
