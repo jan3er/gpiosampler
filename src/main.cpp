@@ -11,10 +11,9 @@ using namespace std;
 
 
 int main(int argc, char *argv[]) {
-  (void) argc;
-  (void) argv;
-  cout << "start" << endl;
-  MyController c;
+  cout << "start gpiosampler" << endl;
+  assert(argc > 1);
+  MyController c(argv[1]);
   c.run();
   return 0;
 }

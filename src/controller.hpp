@@ -29,7 +29,6 @@ protected:
   shared_ptr<GPIO<N> > gpio;
   shared_ptr<Soundbank<N> > soundbank;
   shared_ptr<Trigger<N> > trigger;
-  bool isActive;
 
   /*
    * start SDL and SDL_mixser
@@ -65,11 +64,11 @@ protected:
   virtual void step() = 0;
 
 public:
-  Controller()
+  Controller(string pathToSoundbank)
       : gpio{ new GPIO<N> }, soundbank{ new Soundbank<N> },
-        trigger{ new Trigger<N>(gpio, soundbank) }, isActive(false) {
+        trigger{ new Trigger<N>(gpio, soundbank) } {
     openAudio();
-    soundbank->add("soundbank");
+    soundbank->add(pathToSoundbank);
     trigger->setActive(true);
   }
 
@@ -77,9 +76,9 @@ public:
 
   void run() {
     while (1) {
-        gpio->step();
         this->step();
         trigger->step();
+        gpio->step();
     }
   }
 };

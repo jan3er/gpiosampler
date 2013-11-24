@@ -61,12 +61,12 @@ public:
   Mode getMode() { return mode; }
 
   /*
-   * needs to be called exactly once per circle
+   * to be called exactly once per circle
    */
   void step() {
     for (unsigned int i = 0; i < N; i++) {
       if (!isActive) {
-        Mix_Pause(i);
+        Mix_HaltChannel(i);
       } else {
         typename GPIO<N>::State state = gpio->get(i);
         switch (mode) {

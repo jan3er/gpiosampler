@@ -40,7 +40,8 @@ public:
      
     // traverse directory
     DIR *pdir = opendir(pathToSoundbank.c_str());
-    assert(pdir && "hasdfasdf");
+    cout << "add soundbank: " << pathToSoundbank << endl;
+    assert(pdir && "this soundbank folder does not exist");
     struct dirent *pent = nullptr;
 
     while ((pent = readdir(pdir))) {
@@ -54,7 +55,7 @@ public:
       }
 
       if (elems.size() == 3 && elems[2].compare("wav") == 0) {
-        string fullpath = "soundbank/" + path;
+        string fullpath = pathToSoundbank + "/" + path;
         Mix_Chunk *chunk = Mix_LoadWAV(fullpath.c_str());
         assert(chunk != nullptr);
         unsigned int index = atoi(elems[1].c_str());

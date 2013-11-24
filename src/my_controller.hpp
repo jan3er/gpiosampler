@@ -29,6 +29,7 @@ class MyController : public Controller<7> {
 private:
   static const array<unsigned int, 2> activateButtons;
   static const MyTrigger::Mode defaultMode;
+  bool isActive;
   bool activateButtonsDown;
 
   /*
@@ -51,6 +52,7 @@ private:
 
     //stuff to do when activated or deactivated
     if(isActive && impulse) {
+      trigger->setActive(false);
       cout << "activate controller!" << endl;
     }
     if(!isActive && impulse) {
@@ -82,9 +84,17 @@ private:
     }
   }
 
+
 public:
-  MyController() : activateButtonsDown(false) {
+  MyController(string pathToSoundbank)
+      : Controller(pathToSoundbank), isActive(false),
+        activateButtonsDown(false) {
     trigger->setMode(defaultMode);
+    gpio->step();
+    if(gpio->get(0) != MyGPIO::State::FALLING_EDGE) {
+        cout << "press first button while starting" << endl;
+        exit(1);
+    }
   };
 };
 
